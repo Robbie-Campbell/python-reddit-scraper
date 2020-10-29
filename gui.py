@@ -1,5 +1,8 @@
 import tkinter as tk
 import webbrowser
+from tkinter import ttk
+from PIL import ImageTk
+from logic import ParseUrl
 
 
 def web_lookup(url):
@@ -7,19 +10,24 @@ def web_lookup(url):
 
 
 class Gui:
-    def __init__(self, titles, **kw):
-        self.titles = titles
+    def __init__(self, **kw):
+        self.titles = ParseUrl("http://reddit.com/r/news").titles
         self.root = tk.Tk()
         self.root.resizable(False, False)
         self.root.configure(background="#555")
-        self.root.title("R/News")
-        self.root.frame = tk.Frame(master=self.root, bg="#555")
+        self.root.title("Reddit Top News Posts")
+        self.frame = tk.Frame(master=self.root, bg="#555")
+        self.frame.pack()
         self.panel = tk.PanedWindow()
-        self.root.frame.place(relx=.5, rely=.5, anchor="c")
+        self.frame.place(relx=.5, rely=.55, anchor="c")
+        self.canvas = tk.Canvas(self.root, width=800, height=100, bg="#000")
+        self.canvas.pack()
+        self.image = ImageTk.PhotoImage(file="banner.png")
+        self.canvas.create_image(0, 0, anchor="nw", image=self.image)
 
     def position_root(self):
-        w = 800  # width for the Tk root
-        h = 600  # height for the Tk root
+        w = 600  # width for the Tk root
+        h = 500  # height for the Tk root
 
         # get screen width and height
         ws = self.root.winfo_screenwidth()  # width of the screen
@@ -34,14 +42,33 @@ class Gui:
         self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
     def create_titles(self):
-        for key in self.titles:
-            tk.Label(self.root.frame, text=key + "\n", bg="#555", fg="#DDD").pack()
-            tk.Button(self.root.frame, text="Click To Find Out More", bg="#400", fg="#DDD", command=lambda: web_lookup(self.titles[key])).pack()
-            print(self.titles[key])
+        for index, key in enumerate(self.titles):
+            if len(self.titles) == 0:
+                tk.Label(self.frame, text="There were no posts associated with that search.").pack()
+            elif index < 3:
+                tk.Label(self.frame, text=key + "\n", bg="#555", fg="#DDD", wraplength=500).pack()
+                tk.Button(self.frame, text="Click To Find Out More", bg="#400", fg="#DDD",
+                          command=lambda: web_lookup(self.titles[key])).pack()
+
+    def search(self, url):
+        self.titles = ParseUrl("http://reddit.com/r/" + url).titles
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+        self.root.title("Reddit Top {} Posts".format(url))
+        self.create_titles()
+        self.search_for_more()
+
+    def search_for_more(self):
+        new_search = tk.StringVar()
+        tk.Label(self.frame, bg="#555", fg="#DDD", text="Search for a different subreddit?").pack()
+        ttk.Entry(self.frame, width=15, textvariable=new_search).pack()
+        tk.Button(self.frame, text="search",
+                  command=lambda: self.search(str(new_search.get()))).pack()
 
     def create_gui(self):
         self.position_root()
         self.create_titles()
+        self.search_for_more()
         self.root.mainloop()
         self.root.quit()
 
