@@ -7,13 +7,12 @@ class ParseUrl:
 
         # Get the page content
         self.titles = dict()
-        self.index = 0
         self.session = HTMLSession()
         self.page = self.session.get(url)
         self.parse_to_bs = BeautifulSoup(self.page.content, "html.parser")
         self.links = self.parse_to_bs.find_all("a")
 
-        # Parse the values into a
+        # Parse the values into a dictionary
         for link in self.links:
             content = link.findChildren("h3", text=True)
             if len(content) > 0 and len(self.titles) < 3 and len(link.get("href")) < 100:
