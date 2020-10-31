@@ -7,6 +7,7 @@ class ParseUrl:
 
         # Get the page content
         self.titles = dict()
+        self.index = 0
         self.session = HTMLSession()
         self.page = self.session.get(url)
         self.parse_to_bs = BeautifulSoup(self.page.content, "html.parser")
@@ -15,5 +16,6 @@ class ParseUrl:
         # Parse the values into a
         for link in self.links:
             content = link.findChildren("h3", text=True)
-            if len(content) > 0:
-                self.titles.update({content[0].getText(): "http://reddit.com/" + link.get("href")})
+            if len(content) > 0 and len(self.titles) < 3 and len(link.get("href")) < 100:
+                self.titles.update({content[0].getText().upper(): "http://reddit.com/" + link.get("href")})
+
