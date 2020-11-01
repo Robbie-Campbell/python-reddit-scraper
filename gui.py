@@ -31,7 +31,7 @@ class Gui:
 
     def position_root(self):
         w = 500  # width for the Tk root
-        h = 400  # height for the Tk root
+        h = 500  # height for the Tk root
 
         # get screen width and height
         ws = self.root.winfo_screenwidth()  # width of the screen
